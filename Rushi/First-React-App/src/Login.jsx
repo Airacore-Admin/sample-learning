@@ -17,12 +17,18 @@ const [username, setUsername] = useState('');
 
 
   // Function to handle login
-  const handleLogin = (e) => {
-    e.preventDefault();            // To prevent the default form submit action
+
+  // const handleLogin = (e) => {
+  //   e.preventDefault();            // To prevent the default form submit action
+
+  const handleLogin = async (e = null) => {
+    if (e) e.preventDefault();            // To prevent the default form submit action
+
 
     let emailError = '';
     let passwordError = '';
 
+    // Basic Validation for empty fields
     if (!isValidEmail (username)) {
       emailError = 'Invalid Email.';
     }
@@ -37,13 +43,62 @@ const [username, setUsername] = useState('');
     }
 
     setError({ emailError:'', passwordError:''});
+
+       // Login API call
+       try {
+        const response = await fetch("https://dae4ebe4-bd07-4680-b672-e008113837ee.mock.pstmn.io/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },  
+          body: JSON.stringify({
+            email: username,
+            password: password
+          })
+        });
+  
+        if (response.ok) {
+          const data = await response.text();
+          console.log("API Response:", data);
+
+          // Secondary API Call
+
+
+
+// API Call after successful login
+
     // alert('login Successful');
-    setShowSuccess(true); // Show success message
-    setTimeout(() => {
-      setShowSuccess(false); // Hide after 3 seconds
-      navigate('/dashboard'); // Redirect to Dashboard  // yaha per humne app.js me route path copy kara hai.
-    }, 3000); // 3 seconds delay
-  };
+
+     // Navigate to Dashboard
+     navigate('/dashboard');
+     
+    // setShowSuccess(true); // Show success message  and navigate to dashboard
+    // setTimeout(() => {
+    //   setShowSuccess(false); // Hide after 3 seconds
+    //   navigate('/dashboard'); // Redirect to Dashboard  // yaha per humne app.js me route path copy kara hai.
+    // }, 3000); // 3 seconds delay
+
+  } else {
+    const errorData = await response.json();  // Handle error response
+    console.error("API Error:", errorData);
+    alert(errorData.message || "Login failed!");
+  }
+//   setError({
+//     emailError: "",
+//     passwordError: errorData.message || "Invalid email or password.",
+//   });
+// }
+} catch (error) {
+  console.error("Error during API call:", error);
+  alert("Something went wrong! Please try again.");
+}
+};
+
+const handleKeyPress = (e) => {
+if (e.key === "Enter") {
+  handleLogin(e); // Pass the event explicitly
+}
+};
 
     return (
 
